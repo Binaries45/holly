@@ -1,5 +1,5 @@
 .{
-    .name = .holy,
+    .name = .holly,
     .version = "0.0.0",
     .fingerprint = 0x7ccc61de7bc1a4a7,
     .minimum_zig_version = "0.16.0",
