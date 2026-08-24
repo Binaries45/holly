@@ -14,6 +14,24 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    // idk if this is needed for others,
+    // but I get a fuck ton of linker errors on my machine
+    // when not linking these explicitly
+    exe.root_module.linkSystemLibrary("asound", .{});
+    exe.root_module.linkSystemLibrary("GL", .{});
+    exe.root_module.linkSystemLibrary("X11", .{});
+    exe.root_module.linkSystemLibrary("Xi", .{});
+    exe.root_module.linkSystemLibrary("Xcursor", .{});
+
+    const dep_sokol = b.dependency("sokol", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const mod_sokol = dep_sokol.module("sokol");
+
+    exe.root_module.addImport("sokol", mod_sokol);
+
     b.installArtifact(exe);
 
     const run_step = b.step("run", "Run the app");
