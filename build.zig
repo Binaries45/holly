@@ -1,6 +1,41 @@
 const std = @import("std");
+const Build = std.Build;
 
-pub fn build(b: *std.Build) void {
+const shdc = @import("shdc");
+
+const shader_dir = "src/shaders/";
+const shaders = [_][]const u8{
+    "cell"
+};
+
+fn buildShaders(b: *Build, exe: *Build.Step.Compile) !void {
+    for (shaders) |s| {
+        const shd_step = try buildShader(b, s);
+        exe.step.dependOn(shd_step);
+    } 
+}
+
+fn buildShader(b: *Build, name: []const u8) !*Build.Step {
+    return shdc.createSourceFile(b, .{
+        .shdc_dep = b.dependency("shdc", .{}),
+        .input = b.fmt("{s}{s}.glsl", .{ shader_dir, name }),
+        .output = b.fmt("{s}{s}.glsl.zig", .{ shader_dir, name }),
+        .reflection = true,
+        .slang = .{
+            .glsl410 = true,
+            // TODO : the line below only needs to be added for shader that use compute, 
+            //        later there should be a way to tell which shaders need this, 
+            //        and automatically compile to it but not glsl410.
+            // .glsl430 = true,
+            .metal_macos = true,
+            .hlsl5 = true,
+            .wgsl = true,
+            .spirv_vk = true, 
+        },
+    });
+}
+
+pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
@@ -31,6 +66,8 @@ pub fn build(b: *std.Build) void {
     const mod_sokol = dep_sokol.module("sokol");
 
     exe.root_module.addImport("sokol", mod_sokol);
+
+    try buildShaders(b, exe);
 
     b.installArtifact(exe);
 
