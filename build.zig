@@ -49,6 +49,15 @@ pub fn build(b: *Build) !void {
         }),
     });
 
+    const dep_ve = b.dependency("VoxelEngine", .{
+        .optimize = optimize,
+        .target = target,
+    });
+
+    const mod_ve = dep_ve.module("VoxelEngine");
+
+    exe.root_module.addImport("VoxelEngine", mod_ve);
+
     // idk if this is needed for others,
     // but I get a fuck ton of linker errors on my machine
     // when not linking these explicitly

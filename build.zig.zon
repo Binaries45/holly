@@ -12,6 +12,10 @@
             .url = "git+https://github.com/floooh/sokol-tools-bin.git#af9a893b745c9302114791cde57371b66af9aed6",
             .hash = "sokolshdc-0.1.0-r2KZDp1tUwONDiIq01jjA5YoaXCEWT7mW78wLbpU026q",
         },
+        .VoxelEngine = .{
+            .url = "git+https://github.com/Binaries45/VoxelEngine.git#c08081e8c8c4583462780655e45043ad6a1cb8a4",
+            .hash = "VoxelEngine-0.0.0-fQXf29pJAAAPvk8M0TVM-Qj08bB8kJevaHeUcXQT2KVC",
+        },
     },
     .paths = .{
         "build.zig",

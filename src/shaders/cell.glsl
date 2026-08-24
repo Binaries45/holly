@@ -1,11 +1,11 @@
 @vs vs
-in vec3 position;
+in vec2 position;
 in vec4 color0;
 
 out vec4 color;
 
 void main() {
-    gl_Position = vec4(position, 1.0);
+    gl_Position = vec4(position, 1.0, 1.0);
     color = color0;
 }
 @end
@@ -19,4 +19,4 @@ void main() {
 }
 @end
 
-@program triangle vs fs
+@program cell vs fs
