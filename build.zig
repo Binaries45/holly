@@ -3,38 +3,6 @@ const Build = std.Build;
 
 const shdc = @import("shdc");
 
-const shader_dir = "src/shaders/";
-const shaders = [_][]const u8{
-    "cell"
-};
-
-fn buildShaders(b: *Build, exe: *Build.Step.Compile) !void {
-    for (shaders) |s| {
-        const shd_step = try buildShader(b, s);
-        exe.step.dependOn(shd_step);
-    } 
-}
-
-fn buildShader(b: *Build, name: []const u8) !*Build.Step {
-    return shdc.createSourceFile(b, .{
-        .shdc_dep = b.dependency("shdc", .{}),
-        .input = b.fmt("{s}{s}.glsl", .{ shader_dir, name }),
-        .output = b.fmt("{s}{s}.glsl.zig", .{ shader_dir, name }),
-        .reflection = true,
-        .slang = .{
-            .glsl410 = true,
-            // TODO : the line below only needs to be added for shader that use compute, 
-            //        later there should be a way to tell which shaders need this, 
-            //        and automatically compile to it but not glsl410.
-            // .glsl430 = true,
-            .metal_macos = true,
-            .hlsl5 = true,
-            .wgsl = true,
-            .spirv_vk = true, 
-        },
-    });
-}
-
 pub fn build(b: *Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -49,6 +17,7 @@ pub fn build(b: *Build) !void {
         }),
     });
 
+    // VOXEL ENGINE (FOR MATH) ------------------
     const dep_ve = b.dependency("VoxelEngine", .{
         .optimize = optimize,
         .target = target,
@@ -57,10 +26,9 @@ pub fn build(b: *Build) !void {
     const mod_ve = dep_ve.module("VoxelEngine");
 
     exe.root_module.addImport("VoxelEngine", mod_ve);
+    // ------------------------------------------
 
-    // idk if this is needed for others,
-    // but I get a fuck ton of linker errors on my machine
-    // when not linking these explicitly
+    // SOKOL ------------------------------------
     exe.root_module.linkSystemLibrary("asound", .{});
     exe.root_module.linkSystemLibrary("GL", .{});
     exe.root_module.linkSystemLibrary("X11", .{});
@@ -75,8 +43,35 @@ pub fn build(b: *Build) !void {
     const mod_sokol = dep_sokol.module("sokol");
 
     exe.root_module.addImport("sokol", mod_sokol);
+    // ------------------------------------------
 
-    try buildShaders(b, exe);
+    // SHADERS ----------------------------------
+    const ve = @import("VoxelEngine");
+    const shader_builder = ve.shader_builder;
+    const buildShader = shader_builder.buildShader;
+
+    const shaders: []const []const u8 = &.{
+        "cell"
+    };
+
+    for (shaders) |s| {
+        exe.step.dependOn(try buildShader(b, .{
+            .input = b.fmt("src/shaders/{s}.glsl", .{s}),
+            .output = b.fmt("src/shaders/{s}.glsl.zig", .{s}),
+            .reflection = true,
+            .shdc_dep = b.dependency("shdc", .{}),
+            .slang = .{
+                .glsl410 = true,
+                .metal_macos = true,
+                .hlsl5 = true,
+                .wgsl = true,
+                .spirv_vk = true,  
+            },
+        }
+        )); 
+    } 
+
+    // ------------------------------------------
 
     b.installArtifact(exe);
 

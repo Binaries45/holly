@@ -14,6 +14,18 @@ const Color = Vertex.Color;
 
 const cell_shader = @import("shaders/cell.glsl.zig");
 
+const vertices = [_]Vertex {
+    Vertex { .pos = Pos{-0.5, 0.5},  .color = Color{0.0, 1.0, 1.0, 1.0} },
+    Vertex { .pos = Pos{0.5, 0.5},   .color = Color{1.0, 0.0, 1.0, 1.0} },
+    Vertex { .pos = Pos{0.5, -0.5},  .color = Color{1.0, 1.0, 0.0, 1.0} },
+    Vertex { .pos = Pos{-0.5, -0.5}, .color = Color{0.0, 0.0, 0.0, 1.0} },    
+};
+
+const indices = [_]u16 {
+    0, 1, 2,
+    0, 2, 3,
+};
+
 pub const Renderer = struct {
     pub const state = struct {
         var bind: gfx.Bindings = .{};
@@ -26,23 +38,21 @@ pub const Renderer = struct {
             .logger = .{ .func = log.func } 
         });
 
-        std.debug.print("vertex size: {d}\n", .{@sizeOf(Vertex)});
-        std.debug.print("color offset: {d}\n", .{@offsetOf(Vertex, "color")});
-
-        const vertices = [_]Vertex {
-            Vertex { .pos = Pos{0.0, 0.5},   .color = Color{1.0, 0.0, 0.0, 1.0} },
-            Vertex { .pos = Pos{0.5, -0.5},  .color = Color{0.0, 1.0, 0.0, 1.0} },
-            Vertex { .pos = Pos{-0.5, -0.5}, .color = Color{0.0, 0.0, 1.0, 1.0} },
-        };
-
         // create vertex buffer with triangle vertices
         state.bind.vertex_buffers[0] = gfx.makeBuffer(.{
+            .usage = .{ .vertex_buffer = true },
             .data = gfx.asRange(&vertices),
+        });
+
+        state.bind.index_buffer = gfx.makeBuffer(.{
+            .usage = .{ .index_buffer = true },
+            .data = gfx.asRange(&indices),
         });
 
         // create a shader and pipeline object
         state.pip = gfx.makePipeline(.{
             .shader = gfx.makeShader(cell_shader.cellShaderDesc(gfx.queryBackend())),
+            .index_type = .UINT16,
             .layout = init: {
                 var l = gfx.VertexLayoutState{};
                 l.buffers[0].stride = @sizeOf(Vertex);
@@ -59,7 +69,7 @@ pub const Renderer = struct {
         gfx.beginPass(.{ .swapchain = glue.swapchain() });
         gfx.applyPipeline(state.pip);
         gfx.applyBindings(state.bind);
-        gfx.draw(0, 3, 1);
+        gfx.draw(0, 6, 1);
         gfx.endPass();
         gfx.commit();
     }
