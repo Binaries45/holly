@@ -8,6 +8,14 @@ const log = sokol.log;
 const app = sokol.app;
 const glue = sokol.glue;
 
+const ve = @import("VoxelEngine");
+const math = ve.math;
+const Vector = ve.math.Vector;
+const Vec = Vector.Vec;
+const uVec2 = Vec(2, u32);
+const fVec2 = math.fVec2;
+const fVec4 = math.fVec4;
+
 const Vertex = @import("rendering/Vertex.zig");
 const Pos = Vertex.Pos;
 const Color = Vertex.Color;
@@ -24,6 +32,19 @@ const vertices = [_]Vertex {
 const indices = [_]u16 {
     0, 1, 2,
     0, 2, 3,
+};
+
+// TODO : 
+// - render tiling bg of all cells
+// - 2d camera to support scrolling
+// - render cell content as a layer on top of the cells
+// - render ui on top of everything
+
+// an instance of a single cell on the spreadsheet
+pub const CellInstance = struct {
+    pos: uVec2,
+    size: fVec2,
+    color: fVec4,
 };
 
 pub const Renderer = struct {
