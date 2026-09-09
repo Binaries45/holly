@@ -71,6 +71,7 @@ const max_cells: usize = 128;
 
 pub const Renderer = struct {
     pub const state = struct {
+        var t: f32 = 0;
         var bind: gfx.Bindings = .{};
         var pip: gfx.Pipeline = .{};
         var pass_action: gfx.PassAction = .{};
@@ -167,7 +168,8 @@ pub const Renderer = struct {
 
     pub export fn frame() void {
         const dt: f32 = @floatCast(sapp.frameDuration());
-        state.camera.pos[1] += std.math.sin(dt);
+        state.t += dt;
+        state.camera.pos[1] = std.math.sin(state.t);
 
         gfx.updateBuffer(
             state.bind.vertex_buffers[1], 
