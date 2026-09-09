@@ -6,3 +6,8 @@ pub const Pos = struct {
     row: u32,
     col: u32,
 };
+
+// TODO : value & styling
+
+/// position of the cell relative to cel 0,0
+pos: Pos,

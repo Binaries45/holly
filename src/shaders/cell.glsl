@@ -1,12 +1,22 @@
 @vs vs
+layout(binding=0) uniform vs_params {
+    vec2 camera_pos;
+    float zoom;
+    vec2 viewport_size;
+};
+
 in vec2 position;
-in vec4 color0;
+in vec2 inst_pos;
+in vec2 inst_size;
+in vec4 inst_color;
 
 out vec4 color;
 
 void main() {
-    gl_Position = vec4(position, 1.0, 1.0);
-    color = color0;
+    vec2 pos = position * inst_size + inst_pos + camera_pos;
+
+    gl_Position = vec4(pos, 0.0, 1.0);
+    color = inst_color;
 }
 @end
 
